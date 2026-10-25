@@ -1,0 +1,234 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Creator user profile document",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the creator"
+        },
+        "name": {
+          "type": "string",
+          "description": "Creator full name"
+        },
+        "channelName": {
+          "type": "string",
+          "description": "YouTube channel name"
+        },
+        "channelHandle": {
+          "type": "string",
+          "description": "YouTube channel handle (@handle)"
+        },
+        "channelUrl": {
+          "type": "string",
+          "description": "Direct URL to YouTube channel"
+        },
+        "category": {
+          "type": "string",
+          "description": "Primary content category"
+        },
+        "subscriberRange": {
+          "type": "string",
+          "description": "Subscriber tier descriptor"
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary spoken languages"
+        },
+        "collaborationInterests": {
+          "type": "array",
+          "description": "Tags of collaboration types desired"
+        },
+        "bio": {
+          "type": "string",
+          "description": "Creator bio and collaboration pitch"
+        },
+        "city": {
+          "type": "string",
+          "description": "City and region in India"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp set via FieldValue.serverTimestamp()"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp set via FieldValue.serverTimestamp()"
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "channelName",
+        "category",
+        "subscriberRange",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CollabRequest": {
+      "title": "CollabRequest",
+      "description": "Collaboration proposal sent between creators",
+      "type": "object",
+      "properties": {
+        "senderUserId": {
+          "type": "string",
+          "description": "Auth UID of the sender"
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Sender creator name"
+        },
+        "senderChannelName": {
+          "type": "string",
+          "description": "Sender YouTube channel name"
+        },
+        "senderChannelUrl": {
+          "type": "string",
+          "description": "Sender YouTube channel URL"
+        },
+        "targetCreatorId": {
+          "type": "string",
+          "description": "Target creator ID or user ID"
+        },
+        "targetCreatorName": {
+          "type": "string",
+          "description": "Target creator name"
+        },
+        "targetChannelName": {
+          "type": "string",
+          "description": "Target YouTube channel name"
+        },
+        "collabType": {
+          "type": "string",
+          "description": "Category/type of collaboration"
+        },
+        "projectTitle": {
+          "type": "string",
+          "description": "Proposed collaboration project title"
+        },
+        "timeline": {
+          "type": "string",
+          "description": "Proposed delivery timeline"
+        },
+        "message": {
+          "type": "string",
+          "description": "Collaboration proposal pitch message"
+        },
+        "status": {
+          "type": "string",
+          "description": "Proposal status (PENDING, ACCEPTED, DECLINED, IN_PROGRESS, COMPLETED)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": [
+        "senderUserId",
+        "senderName",
+        "targetCreatorId",
+        "targetCreatorName",
+        "collabType",
+        "projectTitle",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Active collaboration project pipeline",
+      "type": "object",
+      "properties": {
+        "creatorUserId": {
+          "type": "string",
+          "description": "Auth UID of the owning creator"
+        },
+        "title": {
+          "type": "string",
+          "description": "Project title"
+        },
+        "partnerName": {
+          "type": "string",
+          "description": "Collaborating partner name"
+        },
+        "partnerChannelName": {
+          "type": "string",
+          "description": "Collaborating partner channel"
+        },
+        "partnerChannelUrl": {
+          "type": "string",
+          "description": "Collaborating partner YouTube link"
+        },
+        "category": {
+          "type": "string",
+          "description": "Content niche"
+        },
+        "collabType": {
+          "type": "string",
+          "description": "Collaboration type"
+        },
+        "status": {
+          "type": "string",
+          "description": "Project status"
+        },
+        "progressPercent": {
+          "type": "number",
+          "description": "Progress decimal between 0.0 and 1.0"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Shared project notes and links"
+        },
+        "targetReleaseDate": {
+          "type": "string",
+          "description": "Target release date string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": [
+        "creatorUserId",
+        "title",
+        "partnerName",
+        "collabType",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection"
+    },
+    "/collab_requests/{requestId}": {
+      "schema": "CollabRequest",
+      "description": "Collaboration proposals collection"
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Active collaboration tracking pipelines"
+    }
+  }
+}

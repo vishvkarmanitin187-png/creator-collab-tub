@@ -1,0 +1,6 @@
+{
+  "name": "Creator Collab Hub",
+  "description": "Collaboration platform for YouTube creators with profile discovery, collaboration proposals, and project tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
