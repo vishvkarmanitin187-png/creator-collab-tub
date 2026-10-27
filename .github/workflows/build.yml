@@ -23,9 +23,16 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       
-      - name: Decode Keystore
+      - name: Create debug keystore
         run: |
-          echo "${{ secrets.DEBUG_KEYSTORE }}" | base64 -d > debug.keystore
+          keytool -genkey -v -keystore debug.keystore \
+          -storepass android \
+          -alias androiddebugkey \
+          -keypass android \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -dname "CN=Android Debug,O=Android,C=US"
       
       - name: Build APK
         run: ./gradlew assembleDebug
