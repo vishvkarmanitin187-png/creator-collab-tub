@@ -174,6 +174,7 @@ fun CreatorCollabApp(
     val collabRequests by viewModel.collabRequests.collectAsStateWithLifecycle()
     val projects by viewModel.projects.collectAsStateWithLifecycle()
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+    val profileSaveState by viewModel.profileSaveState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -402,11 +403,25 @@ fun CreatorCollabApp(
                             ProfileScreen(
                                 userProfile = userProfile,
                                 currentLanguage = currentLanguage,
+                                saveState = profileSaveState,
+                                onResetSaveState = { viewModel.resetProfileSaveState() },
                                 onToggleLanguage = { viewModel.toggleLanguage() },
                                 onResetDemoData = { viewModel.resetToDemoData() },
                                 onSignOut = onSignOut,
-                                onUpdateProfile = { name, chName, chUrl, cat, sub, lang, bio, interests ->
-                                    viewModel.updateUserProfile(name, chName, chUrl, cat, sub, lang, bio, interests)
+                                onUpdateProfile = { name, handle, chName, chUrl, cat, sub, lang, country, bio, interests, photoUri ->
+                                    viewModel.updateUserProfile(
+                                        name = name,
+                                        channelHandle = handle,
+                                        channelName = chName,
+                                        channelUrl = chUrl,
+                                        category = cat,
+                                        subRange = sub,
+                                        language = lang,
+                                        country = country,
+                                        bio = bio,
+                                        interests = interests,
+                                        photoUri = photoUri
+                                    )
                                 }
                             )
                         }

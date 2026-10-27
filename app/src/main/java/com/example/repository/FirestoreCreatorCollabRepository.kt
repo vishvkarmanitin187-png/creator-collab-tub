@@ -343,7 +343,6 @@ class FirestoreCreatorCollabRepository(private val db: FirebaseFirestore) : Crea
                                 listOf("Cross-Promotion", "Guest Podcasts", "Tech Review Exchanges")
                             },
                             bio = userDoc.bio.ifBlank { "Passionate YouTube creator producing videos, tutorials and collaborations." },
-                            bio = userDoc.bio.ifBlank { "Passionate YouTube creator producing videos, tutorials and collaborations." },
                             city = userDoc.city.ifBlank { "India" },
                             country = userDoc.country.ifBlank { "India" },
                             photoUri = userDoc.photoUri.ifBlank { null },

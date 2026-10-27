@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Creator Collab Hub</string>
+    <string name="default_web_client_id" translatable="false">156894721846-55mu9b0lbt51s3qgrs7ob4kk72mdibbi.apps.googleusercontent.com</string>
 </resources>
 

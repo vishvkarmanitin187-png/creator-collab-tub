@@ -2,6 +2,9 @@ package com.example.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,13 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.model.*
 import com.example.ui.theme.*
+import com.example.viewmodel.ProfileSaveState
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -35,15 +41,20 @@ fun ProfileScreen(
     onToggleLanguage: () -> Unit,
     onResetDemoData: () -> Unit,
     onSignOut: () -> Unit = {},
+    saveState: ProfileSaveState = ProfileSaveState.Idle,
+    onResetSaveState: () -> Unit = {},
     onUpdateProfile: (
         name: String,
+        channelHandle: String,
         channelName: String,
         channelUrl: String,
         category: CreatorCategory,
         subRange: SubscriberRange,
         language: String,
+        country: String,
         bio: String,
-        interests: List<String>
+        interests: List<String>,
+        photoUri: String?
     ) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -55,15 +66,27 @@ fun ProfileScreen(
 
     // Edit form states
     var nameState by remember(userProfile.name) { mutableStateOf(userProfile.name) }
+    var channelHandleState by remember(userProfile.channelHandle) { mutableStateOf(userProfile.channelHandle) }
     var channelNameState by remember(userProfile.channelName) { mutableStateOf(userProfile.channelName) }
     var channelUrlState by remember(userProfile.channelUrl) { mutableStateOf(userProfile.channelUrl) }
     var categoryState by remember(userProfile.category) { mutableStateOf(userProfile.category) }
     var subRangeState by remember(userProfile.subscriberRange) { mutableStateOf(userProfile.subscriberRange) }
     var languageState by remember(userProfile.language) { mutableStateOf(userProfile.language) }
+    var countryState by remember(userProfile.country) { mutableStateOf(userProfile.country) }
     var bioState by remember(userProfile.bio) { mutableStateOf(userProfile.bio) }
+    var photoUriState by remember(userProfile.photoUri) { mutableStateOf(userProfile.photoUri) }
     var newInterestInput by remember { mutableStateOf("") }
+    var validationError by remember { mutableStateOf<String?>(null) }
     var interestsList by remember(userProfile.collaborationInterests) {
         mutableStateOf(userProfile.collaborationInterests)
+    }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            photoUriState = uri.toString()
+        }
     }
 
     Column(
@@ -87,27 +110,62 @@ fun ProfileScreen(
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Avatar
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(PurplePrimary, ElectricCyan)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    val initials = userProfile.name.split(" ")
-                        .mapNotNull { it.firstOrNull()?.toString() }
-                        .take(2)
-                        .joinToString("")
-                    Text(
-                        text = initials.ifBlank { "ME" },
-                        color = Color.White,
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                // Avatar with Photo Picker support
+                val currentPhoto = if (isEditing) photoUriState else userProfile.photoUri
+                if (!currentPhoto.isNullOrBlank()) {
+                    AsyncImage(
+                        model = currentPhoto,
+                        contentDescription = "Profile Photo",
+                        modifier = Modifier
+                            .size(84.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, PurplePrimary, CircleShape),
+                        contentScale = ContentScale.Crop
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(84.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(PurplePrimary, ElectricCyan)
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val initials = userProfile.name.split(" ")
+                            .mapNotNull { it.firstOrNull()?.toString() }
+                            .take(2)
+                            .joinToString("")
+                        Text(
+                            text = initials.ifBlank { "ME" },
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
+
+                if (isEditing) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ElectricCyan),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, ElectricCyan.copy(alpha = 0.6f)),
+                        modifier = Modifier.testTag("btn_pick_profile_photo")
+                    ) {
+                        Icon(imageVector = Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (currentLanguage == AppLanguage.HINDI) "फ़ोटो बदलें (Photo Picker)" else "Change Photo",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -198,6 +256,22 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("input_edit_name"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PurplePrimary,
+                            unfocusedBorderColor = NavyBorder,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
+                        ),
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = channelHandleState,
+                        onValueChange = { channelHandleState = it },
+                        label = { Text(if (currentLanguage == AppLanguage.HINDI) "यूज़रनेम / हैंडल (@username)" else "Username / Handle (@username)") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("input_edit_channel_handle"),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = PurplePrimary,
                             unfocusedBorderColor = NavyBorder,
@@ -304,6 +378,22 @@ fun ProfileScreen(
                     )
 
                     OutlinedTextField(
+                        value = countryState,
+                        onValueChange = { countryState = it },
+                        label = { Text(if (currentLanguage == AppLanguage.HINDI) "देश / स्थान (Country)" else "Country / Location") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("input_edit_country"),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PurplePrimary,
+                            unfocusedBorderColor = NavyBorder,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
+                        ),
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
                         value = bioState,
                         onValueChange = { bioState = it },
                         label = { Text(if (currentLanguage == AppLanguage.HINDI) "बायो व पिच" else "Channel Bio & Pitch") },
@@ -387,18 +477,117 @@ fun ProfileScreen(
                         }
                     }
 
+                    // Validation Error Alert
+                    if (validationError != null) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = RoseError.copy(alpha = 0.2f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, RoseError),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(imageVector = Icons.Default.ErrorOutline, contentDescription = null, tint = RoseError)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = validationError!!, color = RoseError, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+
+                    // Save State Feedback
+                    when (saveState) {
+                        is ProfileSaveState.Loading -> {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(4.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), color = PurplePrimary)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (currentLanguage == AppLanguage.HINDI) "क्लाउड पर सेव हो रहा है..." else "Saving to Cloud Firestore...",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                        }
+                        is ProfileSaveState.Success -> {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = EmeraldSuccess.copy(alpha = 0.2f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, EmeraldSuccess),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldSuccess)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(text = saveState.message, color = EmeraldSuccess, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+                        is ProfileSaveState.Error -> {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = RoseError.copy(alpha = 0.2f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, RoseError),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(imageVector = Icons.Default.ErrorOutline, contentDescription = null, tint = RoseError)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(text = saveState.message, color = RoseError, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+                        else -> {}
+                    }
+
                     // Save Button
                     Button(
                         onClick = {
+                            if (nameState.isBlank()) {
+                                validationError = if (currentLanguage == AppLanguage.HINDI)
+                                    "कृपया अपना नाम दर्ज करें।"
+                                else
+                                    "Display name cannot be empty."
+                                return@Button
+                            }
+                            val cleanHandle = if (channelHandleState.startsWith("@")) channelHandleState.trim() else "@${channelHandleState.trim()}"
+                            if (cleanHandle.length < 3) {
+                                validationError = if (currentLanguage == AppLanguage.HINDI)
+                                    "यूज़रनेम कम से कम 3 अक्षरों का होना चाहिए।"
+                                else
+                                    "Username must be at least 3 characters."
+                                return@Button
+                            }
+                            if (channelUrlState.isNotBlank() && !channelUrlState.startsWith("http://") && !channelUrlState.startsWith("https://")) {
+                                validationError = if (currentLanguage == AppLanguage.HINDI)
+                                    "वैध यूट्यूब URL दर्ज करें (जैसे https://...)"
+                                else
+                                    "Please enter a valid URL starting with https://"
+                                return@Button
+                            }
+                            validationError = null
                             onUpdateProfile(
                                 nameState.trim(),
+                                cleanHandle,
                                 channelNameState.trim(),
                                 channelUrlState.trim(),
                                 categoryState,
                                 subRangeState,
                                 languageState.trim(),
+                                countryState.trim(),
                                 bioState.trim(),
-                                interestsList
+                                interestsList,
+                                photoUriState
                             )
                             isEditing = false
                         },
