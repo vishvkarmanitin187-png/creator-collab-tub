@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.model.AppLanguage
 import com.example.model.CreatorCategory
+import com.example.model.SubscriberRange
 import com.example.repository.FirestoreCreatorCollabRepository
 import com.example.ui.auth.AuthManager
 import com.example.ui.components.AppTopBar
@@ -58,7 +59,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Attempt silent background auto sign-in for returning users
         val credentialManager = CredentialManager.create(this)
         AuthManager.attemptAutoSignIn(
             context = this,
@@ -102,7 +102,11 @@ fun AppContent() {
         SignInScreen(
             currentLanguage = currentLanguage,
             onToggleLanguage = {
-                currentLanguage = if (currentLanguage == AppLanguage.ENGLISH) AppLanguage.HINDI else AppLanguage.ENGLISH
+                currentLanguage = if (currentLanguage == AppLanguage.ENGLISH) {
+                    AppLanguage.HINDI
+                } else {
+                    AppLanguage.ENGLISH
+                }
             },
             onAuthSuccess = {
                 currentUser = Firebase.auth.currentUser
@@ -186,13 +190,10 @@ fun CreatorCollabApp(
         }
     }
 
-    // Handle System Back Press:
-    // 1. If detail view is open, close it
     BackHandler(enabled = selectedCreator != null) {
         viewModel.selectCreator(null)
     }
 
-    // 2. If on secondary tabs, return to HOME tab instead of closing the app
     BackHandler(enabled = selectedCreator == null && currentTab != NavigationTab.HOME) {
         currentTab = NavigationTab.HOME
     }
@@ -205,14 +206,34 @@ fun CreatorCollabApp(
             if (selectedCreator == null) {
                 Column {
                     val screenTitle = when (currentTab) {
-                        NavigationTab.HOME -> if (currentLanguage == AppLanguage.HINDI) "क्रिएटर कोलैब हब" else "Creator Collab Hub"
-                        NavigationTab.EXPLORE -> if (currentLanguage == AppLanguage.HINDI) "क्रिएटर खोजें" else "Explore Creators"
-                        NavigationTab.PROJECTS -> if (currentLanguage == AppLanguage.HINDI) "सहयोग व प्रोजेक्ट्स" else "Projects & Collabs"
-                        NavigationTab.PROFILE -> if (currentLanguage == AppLanguage.HINDI) "मेरी क्रिएटर प्रोफ़ाइल" else "My Creator Profile"
+                        NavigationTab.HOME -> if (currentLanguage == AppLanguage.HINDI) {
+                            "क्रिएटर कोलैब हब"
+                        } else {
+                            "Creator Collab Hub"
+                        }
+                        NavigationTab.EXPLORE -> if (currentLanguage == AppLanguage.HINDI) {
+                            "क्रिएटर खोजें"
+                        } else {
+                            "Explore Creators"
+                        }
+                        NavigationTab.PROJECTS -> if (currentLanguage == AppLanguage.HINDI) {
+                            "सहयोग व प्रोजेक्ट्स"
+                        } else {
+                            "Projects & Collabs"
+                        }
+                        NavigationTab.PROFILE -> if (currentLanguage == AppLanguage.HINDI) {
+                            "मेरी क्रिएटर प्रोफ़ाइल"
+                        } else {
+                            "My Creator Profile"
+                        }
                     }
 
                     val subtitle = when (currentTab) {
-                        NavigationTab.HOME -> if (currentLanguage == AppLanguage.HINDI) "यूट्यूब सहयोग नेटवर्क" else "YouTube Collab Platform"
+                        NavigationTab.HOME -> if (currentLanguage == AppLanguage.HINDI) {
+                            "यूट्यूब सहयोग नेटवर्क"
+                        } else {
+                            "YouTube Collab Platform"
+                        }
                         NavigationTab.EXPLORE -> "${filteredCreators.size} ${if (currentLanguage == AppLanguage.HINDI) "क्रिएटर्स उपलब्ध" else "creators active"}"
                         NavigationTab.PROJECTS -> "${projects.size} ${if (currentLanguage == AppLanguage.HINDI) "प्रोजेक्ट्स" else "pipelines"}"
                         NavigationTab.PROFILE -> userProfile.channelName
@@ -228,7 +249,10 @@ fun CreatorCollabApp(
                     if (isGuest) {
                         Surface(
                             color = PurplePrimary.copy(alpha = 0.2f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, PurplePrimary.copy(alpha = 0.4f)),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                PurplePrimary.copy(alpha = 0.4f)
+                            ),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 4.dp),
@@ -251,21 +275,33 @@ fun CreatorCollabApp(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = if (currentLanguage == AppLanguage.HINDI)
+                                        text = if (currentLanguage == AppLanguage.HINDI) {
                                             "गेस्ट मोड: क्लाउड सिंक हेतु साइन-इन करें"
-                                        else
-                                            "Guest Mode: Sign in to sync data",
-                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                        } else {
+                                            "Guest Mode: Sign in to sync data"
+                                        },
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontSize = 11.sp
+                                        ),
                                         color = TextPrimary
                                     )
                                 }
                                 TextButton(
                                     onClick = onRequestSignIn,
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                                    contentPadding = PaddingValues(
+                                        horizontal = 8.dp,
+                                        vertical = 0.dp
+                                    )
                                 ) {
                                     Text(
-                                        text = if (currentLanguage == AppLanguage.HINDI) "साइन इन" else "Sign In",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        text = if (currentLanguage == AppLanguage.HINDI) {
+                                            "साइन इन"
+                                        } else {
+                                            "Sign In"
+                                        },
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
                                         color = ElectricCyan
                                     )
                                 }
@@ -287,13 +323,19 @@ fun CreatorCollabApp(
                 ) {
                     NavigationTab.values().forEach { tab ->
                         val isSelected = currentTab == tab
-                        val label = if (currentLanguage == AppLanguage.HINDI) tab.titleHi else tab.titleEn
+                        val label = if (currentLanguage == AppLanguage.HINDI) {
+                            tab.titleHi
+                        } else {
+                            tab.titleEn
+                        }
 
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = { currentTab = tab },
                             icon = {
-                                if (tab == NavigationTab.PROJECTS && collabRequests.any { it.isIncoming && it.status == com.example.model.CollabStatus.PENDING }) {
+                                if (tab == NavigationTab.PROJECTS && collabRequests.any {
+                                    it.isIncoming && it.status == com.example.model.CollabStatus.PENDING
+                                }) {
                                     BadgedBox(
                                         badge = {
                                             Badge(containerColor = AmberAccent) {
@@ -301,17 +343,27 @@ fun CreatorCollabApp(
                                             }
                                         }
                                     ) {
-                                        Icon(imageVector = tab.icon, contentDescription = label)
+                                        Icon(
+                                            imageVector = tab.icon,
+                                            contentDescription = label
+                                        )
                                     }
                                 } else {
-                                    Icon(imageVector = tab.icon, contentDescription = label)
+                                    Icon(
+                                        imageVector = tab.icon,
+                                        contentDescription = label
+                                    )
                                 }
                             },
                             label = {
                                 Text(
                                     text = label,
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                        fontWeight = if (isSelected) {
+                                            FontWeight.Bold
+                                        } else {
+                                            FontWeight.Medium
+                                        }
                                     )
                                 )
                             },
@@ -331,7 +383,9 @@ fun CreatorCollabApp(
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = if (selectedCreator == null) 80.dp else 16.dp)
+                modifier = Modifier.padding(
+                    bottom = if (selectedCreator == null) 80.dp else 16.dp
+                )
             )
         }
     ) { innerPadding ->
@@ -393,9 +447,15 @@ fun CreatorCollabApp(
                                 projects = projects,
                                 collabRequests = collabRequests,
                                 currentLanguage = currentLanguage,
-                                onToggleMilestone = { pId, mId -> viewModel.toggleMilestone(pId, mId) },
-                                onUpdateProjectNotes = { pId, notes -> viewModel.updateProjectNotes(pId, notes) },
-                                onUpdateRequestStatus = { rId, status -> viewModel.updateRequestStatus(rId, status) }
+                                onToggleMilestone = { pId, mId ->
+                                    viewModel.toggleMilestone(pId, mId)
+                                },
+                                onUpdateProjectNotes = { pId, notes ->
+                                    viewModel.updateProjectNotes(pId, notes)
+                                },
+                                onUpdateRequestStatus = { rId, status ->
+                                    viewModel.updateRequestStatus(rId, status)
+                                }
                             )
                         }
 
@@ -428,7 +488,6 @@ fun CreatorCollabApp(
                     }
                 }
 
-                // Collab Request Dialog
                 if (collabTargetCreator != null) {
                     CollabRequestDialog(
                         targetCreator = collabTargetCreator!!,
