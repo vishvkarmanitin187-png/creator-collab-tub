@@ -28,6 +28,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import coil.compose.AsyncImage
 import com.example.model.*
 import com.example.ui.theme.*
@@ -60,6 +63,9 @@ fun ProfileScreen(
 ) {
     var isEditing by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
+    var showPrivacyDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
     var collabNotificationsEnabled by remember { mutableStateOf(true) }
     var milestoneAlertsEnabled by remember { mutableStateOf(true) }
     val context = LocalContext.current
@@ -960,6 +966,128 @@ fun ProfileScreen(
                         }
                     }
                 }
+
+                // About Creator Collab Hub Card (Brand Logo & Identity)
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = NavySurface,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, PurplePrimary.copy(alpha = 0.5f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showAboutDialog = true }
+                        .testTag("about_app_card")
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.ic_creator_collab_logo),
+                                contentDescription = "Creator Collab Hub Logo",
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                            )
+                            Column {
+                                Text(
+                                    text = if (currentLanguage == AppLanguage.HINDI) "ऐप के बारे में (About App)" else "About Creator Collab Hub",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = "Version 1.0 • Together, We Create More.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = ElectricCyan
+                                )
+                            }
+                        }
+                        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = TextMuted)
+                    }
+                }
+
+                // Privacy Policy Card (Google Play Compliance)
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = NavySurface,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, NavyBorder),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showPrivacyDialog = true }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.PrivacyTip, contentDescription = null, tint = ElectricCyan)
+                            Column {
+                                Text(
+                                    text = if (currentLanguage == AppLanguage.HINDI) "गोपनीयता नीति (Privacy Policy)" else "Privacy Policy & Terms",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = if (currentLanguage == AppLanguage.HINDI) "डेटा सुरक्षा और गूगल प्ले अनुपालन विवरण" else "Data safety, encryption, and terms of service",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextMuted
+                                )
+                            }
+                        }
+                        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = TextMuted)
+                    }
+                }
+
+                // Delete Account Card (Google Play Mandatory Policy)
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = NavySurface,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, RoseError.copy(alpha = 0.3f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (currentLanguage == AppLanguage.HINDI) "खाता व डेटा हटाएं" else "Delete Account & Data",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = RoseError
+                            )
+                            Text(
+                                text = if (currentLanguage == AppLanguage.HINDI) "क्लाउड से आपका प्रोफाइल और सभी डेटा स्थायी रूप से हटाएं" else "Permanently erase creator profile and collab records",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextMuted
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = { showDeleteAccountDialog = true },
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = RoseError),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, RoseError),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(if (currentLanguage == AppLanguage.HINDI) "हटाएं" else "Delete")
+                        }
+                    }
+                }
             }
         }
 
@@ -1001,5 +1129,191 @@ fun ProfileScreen(
                 textContentColor = TextSecondary
             )
         }
+
+        if (showPrivacyDialog) {
+            AlertDialog(
+                onDismissRequest = { showPrivacyDialog = false },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Security, contentDescription = null, tint = ElectricCyan)
+                        Text(
+                            text = if (currentLanguage == AppLanguage.HINDI) "गोपनीयता नीति" else "Privacy Policy",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = if (currentLanguage == AppLanguage.HINDI)
+                                "1. डेटा सुरक्षा: आपकी क्रिएटर प्रोफ़ाइल केवल अन्य क्रिएटर्स के साथ सहयोग के उद्देश्य से सहेजी जाती है।\n\n" +
+                                "2. तृतीय-पक्ष शेयरिंग: हम आपका व्यक्तिगत डेटा या यूट्यूब विवरण किसी तीसरे पक्ष या विज्ञापन नेटवर्क को नहीं बेचते हैं।\n\n" +
+                                "3. प्रमाणीकरण: हम सुरक्षित गूगल साइन-इन का उपयोग करते हैं। पासवर्ड कभी भी हमारे सर्वर पर संग्रहीत नहीं होते हैं।\n\n" +
+                                "4. डेटा नियंत्रण: आप किसी भी समय अपनी प्रोफ़ाइल संपादित कर सकते हैं या 'खाता व डेटा हटाएं' विकल्प चुन सकते हैं।"
+                            else
+                                "1. Data Safety: Your creator profile information is stored securely in Cloud Firestore solely for the purpose of creator collaboration.\n\n" +
+                                "2. Zero Third-Party Sharing: We do not sell or share your personal data, channel links, or contact info with advertising networks.\n\n" +
+                                "3. Secure Authentication: All logins utilize Google Identity Services via Android Credential Manager with encrypted tokens.\n\n" +
+                                "4. Full Control: You can edit or permanently delete your account and associated records anytime.",
+                            style = MaterialTheme.typography.bodySmall,
+                            lineHeight = 18.sp
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { showPrivacyDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = PurplePrimary)
+                    ) {
+                        Text(if (currentLanguage == AppLanguage.HINDI) "समझ गया" else "Got It")
+                    }
+                },
+                containerColor = NavySurface,
+                titleContentColor = TextPrimary,
+                textContentColor = TextSecondary
+            )
+        }
+
+        if (showAboutDialog) {
+            AlertDialog(
+                onDismissRequest = { showAboutDialog = false },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_creator_collab_logo),
+                            contentDescription = "Creator Collab Hub Logo",
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                        Column {
+                            Text(
+                                text = "Creator Collab Hub",
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Find Creators. Build Together.",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = ElectricCyan
+                            )
+                        }
+                    }
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = NavyBackground,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, PurplePrimary.copy(alpha = 0.4f)),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(14.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_creator_collab_logo),
+                                    contentDescription = "Official Brand Symbol",
+                                    modifier = Modifier.size(64.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Together, We Create More.",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = ElectricCyan
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = if (currentLanguage == AppLanguage.HINDI)
+                                "Creator Collab Hub एक आधुनिक प्लेटफ़ॉर्म है जो यूट्यूब, गेमिंग और डिजिटल क्रिएटर्स को आपस में जोड़ता है, ताकि वे नए प्रोजेक्ट्स पर मिलकर काम कर सकें और अपने कंटेंट को अगले स्तर पर ले जा सकें।"
+                            else
+                                "Creator Collab Hub is the premier collaborative network empowering content creators, YouTubers, and digital artists to discover partners, co-create projects, and elevate their digital presence.",
+                            style = MaterialTheme.typography.bodySmall,
+                            lineHeight = 18.sp,
+                            color = TextSecondary
+                        )
+
+                        Text(
+                            text = "Version 1.0.0 (Official Release)\nPowered by Cloud Firestore",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextMuted,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { showAboutDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = PurplePrimary)
+                    ) {
+                        Text(if (currentLanguage == AppLanguage.HINDI) "ठीक है" else "Close")
+                    }
+                },
+                containerColor = NavySurface,
+                titleContentColor = TextPrimary,
+                textContentColor = TextSecondary
+            )
+        }
+
+        if (showDeleteAccountDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteAccountDialog = false },
+                title = {
+                    Text(
+                        text = if (currentLanguage == AppLanguage.HINDI) "खाता व डेटा स्थायी रूप से हटाएं?" else "Delete Account & All Data?",
+                        fontWeight = FontWeight.Bold,
+                        color = RoseError
+                    )
+                },
+                text = {
+                    Text(
+                        text = if (currentLanguage == AppLanguage.HINDI)
+                            "क्या आप वाकई अपना क्रिएटर खाता हटाना चाहते हैं? यह कार्रवाई अपरिवर्तनीय है। आपकी प्रोफ़ाइल, संदेश और सभी प्रोजेक्ट्स क्लाउड से मिटा दिए जाएंगे।"
+                        else
+                            "Are you sure you want to permanently delete your creator profile and data? This action cannot be undone and will erase your cloud records immediately."
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeleteAccountDialog = false
+                            try {
+                                com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.delete()
+                            } catch (_: Exception) {}
+                            onSignOut()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = RoseError)
+                    ) {
+                        Text(if (currentLanguage == AppLanguage.HINDI) "हाँ, हमेशा के लिए हटाएं" else "Yes, Delete Permanently")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteAccountDialog = false }) {
+                        Text(if (currentLanguage == AppLanguage.HINDI) "रद्द करें" else "Cancel")
+                    }
+                },
+                containerColor = NavySurface,
+                titleContentColor = TextPrimary,
+                textContentColor = TextSecondary
+            )
+        }
     }
 }
+

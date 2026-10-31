@@ -49,6 +49,15 @@ service cloud.firestore {
         && isValidTimestamp(data.updatedAt);
     }
 
+    function isValidMessage(data) {
+      return data.keys().hasAll(['senderId', 'receiverId', 'senderName', 'text', 'createdAt'])
+        && data.senderId is string
+        && data.receiverId is string
+        && data.senderName is string && data.senderName.size() > 0 && data.senderName.size() <= 100
+        && data.text is string && data.text.size() > 0 && data.text.size() <= 2000
+        && isValidTimestamp(data.createdAt);
+    }
+
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isOwner(userId)
@@ -86,5 +95,17 @@ service cloud.firestore {
         && isValidProject(request.resource.data);
       allow delete: if isAuthenticated() && resource.data.creatorUserId == request.auth.uid;
     }
+
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() && (
+        resource.data.senderId == request.auth.uid ||
+        resource.data.receiverId == request.auth.uid
+      );
+      allow create: if isAuthenticated()
+        && request.resource.data.senderId == request.auth.uid
+        && isValidMessage(request.resource.data);
+      allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+    }
   }
 }
+

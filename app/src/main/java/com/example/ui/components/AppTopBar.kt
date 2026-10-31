@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,11 +19,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.model.AppLanguage
 import com.example.ui.theme.*
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,25 +61,15 @@ fun AppTopBar(
                     )
                 }
             } else {
-                Box(
+                Image(
+                    painter = painterResource(R.drawable.ic_creator_collab_logo),
+                    contentDescription = "Creator Collab Hub Logo",
                     modifier = Modifier
-                        .padding(start = 12.dp, end = 4.dp)
+                        .padding(start = 12.dp, end = 6.dp)
                         .size(36.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(PurplePrimary, ElectricCyan)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
+                        .clip(RoundedCornerShape(8.dp))
+                        .testTag("top_bar_brand_logo")
+                )
             }
         },
         title = {

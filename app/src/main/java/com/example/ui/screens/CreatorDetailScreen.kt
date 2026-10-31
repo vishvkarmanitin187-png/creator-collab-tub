@@ -36,6 +36,7 @@ fun CreatorDetailScreen(
     currentLanguage: AppLanguage,
     onBack: () -> Unit,
     onCollabClick: (CreatorProfile) -> Unit,
+    onStartChat: (CreatorProfile) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     BackHandler { onBack() }
@@ -57,30 +58,47 @@ fun CreatorDetailScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                         .navigationBarsPadding(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(
+                    IconButton(
                         onClick = {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(creator.channelUrl))
                             context.startActivity(intent)
                         },
                         modifier = Modifier
-                            .weight(1f)
-                            .height(50.dp)
-                            .testTag("detail_open_yt"),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = YouTubeRed),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, YouTubeRed)
+                            .size(50.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(NavySurfaceVariant)
+                            .border(1.dp, YouTubeRed.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                            .testTag("detail_open_yt")
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayCircle,
-                            contentDescription = null,
+                            contentDescription = "Open YouTube",
                             tint = YouTubeRed
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = { onStartChat(creator) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp)
+                            .testTag("detail_start_chat"),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ElectricCyan),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, ElectricCyan)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Chat,
+                            contentDescription = null,
+                            tint = ElectricCyan,
+                            modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "YouTube",
+                            text = if (currentLanguage == AppLanguage.HINDI) "चैट" else "Chat",
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
@@ -88,7 +106,7 @@ fun CreatorDetailScreen(
                     Button(
                         onClick = { onCollabClick(creator) },
                         modifier = Modifier
-                            .weight(1.5f)
+                            .weight(1.3f)
                             .height(50.dp)
                             .testTag("detail_propose_collab"),
                         shape = RoundedCornerShape(12.dp),
@@ -97,17 +115,19 @@ fun CreatorDetailScreen(
                         Icon(
                             imageVector = Icons.Default.Handshake,
                             contentDescription = null,
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (currentLanguage == AppLanguage.HINDI) "सहयोग प्रस्ताव भेजें" else "Propose Collab",
+                            text = if (currentLanguage == AppLanguage.HINDI) "प्रस्ताव" else "Collab",
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                             color = Color.White
                         )
                     }
                 }
             }
+
         }
     ) { innerPadding ->
         Column(

@@ -133,3 +133,27 @@ data class CollabProject(
     val targetReleaseDate: String,
     val lastUpdated: String
 )
+
+data class ChatMessage(
+    val id: String = "",
+    val conversationId: String = "",
+    val senderId: String = "",
+    val receiverId: String = "",
+    val senderName: String = "",
+    val receiverName: String = "",
+    val text: String = "",
+    val timestampMillis: Long = System.currentTimeMillis(),
+    val isFromMe: Boolean = false
+)
+
+data class ChatConversation(
+    val partnerId: String,
+    val partnerName: String,
+    val partnerChannelName: String,
+    val partnerCategory: CreatorCategory = CreatorCategory.TECH,
+    val partnerAvatarColorHex: Long = 0xFF8B5CF6,
+    val lastMessage: String,
+    val lastMessageTime: String,
+    val unreadCount: Int = 0
+)
+

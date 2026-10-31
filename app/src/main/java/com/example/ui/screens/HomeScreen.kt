@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,10 +23,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.model.AppLanguage
+
 import com.example.model.CreatorCategory
 import com.example.model.CreatorProfile
 import com.example.ui.components.CreatorCard
@@ -81,68 +85,84 @@ fun HomeScreen(
                         )
                 )
 
-                Column(
+                Row(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(horizontal = 18.dp, vertical = 14.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 18.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color(0xFF252345),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            PurplePrimary.copy(alpha = 0.7f)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                horizontal = 12.dp,
-                                vertical = 6.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color(0xFF252345),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                PurplePrimary.copy(alpha = 0.7f)
+                            )
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF40E0A0))
-                            )
-                            Text(
-                                text = if (currentLanguage == AppLanguage.HINDI)
-                                    "भारतीय क्रिएटर नेटवर्क"
-                                else
-                                    "INDIAN CREATOR NETWORK",
-                                color = Color(0xFF67E8F9),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Row(
+                                modifier = Modifier.padding(
+                                    horizontal = 12.dp,
+                                    vertical = 6.dp
+                                ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(7.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF40E0A0))
+                                )
+                                Text(
+                                    text = if (currentLanguage == AppLanguage.HINDI)
+                                        "भारतीय क्रिएटर नेटवर्क"
+                                    else
+                                        "INDIAN CREATOR NETWORK",
+                                    color = Color(0xFF67E8F9),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = if (currentLanguage == AppLanguage.HINDI)
+                                "नमस्ते क्रिएटर! 🙏"
+                            else
+                                "Namaste Creator! 🙏",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.3.sp
+                            ),
+                            color = Color.White
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = if (currentLanguage == AppLanguage.HINDI)
+                                "Find Creators. Build Together."
+                            else
+                                "Find Creators. Build Together.",
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = ElectricCyan
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                    Text(
-                        text = if (currentLanguage == AppLanguage.HINDI)
-                            "नमस्ते क्रिएटर! 🙏"
-                        else
-                            "Namaste Creator! 🙏",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 0.3.sp
-                        ),
-                        color = Color.White
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = if (currentLanguage == AppLanguage.HINDI)
-                            "नए क्रिएटर्स खोजें और साथ मिलकर आगे बढ़ें।"
-                        else
-                            "Discover creators, collaborate and grow together.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD7D5EF)
+                    Image(
+                        painter = painterResource(R.drawable.ic_creator_collab_logo),
+                        contentDescription = "Creator Collab Hub Logo",
+                        modifier = Modifier
+                            .size(68.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(1.dp, PurplePrimary.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
                     )
                 }
             }

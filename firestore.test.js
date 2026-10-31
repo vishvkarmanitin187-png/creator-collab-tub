@@ -136,3 +136,32 @@ test("Creator can manage their own projects with cross-user isolation", async ()
     })
   );
 });
+
+test("Private one-to-one messaging isolation between creators", async () => {
+  const aliceDb = testEnv.authenticatedContext("alice").firestore(DATABASE_ID);
+  const bobDb = testEnv.authenticatedContext("bob").firestore(DATABASE_ID);
+  const charlieDb = testEnv.authenticatedContext("charlie").firestore(DATABASE_ID);
+  const now = new Date();
+
+  const msgDoc = aliceDb.collection("messages").doc("msg_1");
+
+  // Alice sends message to Bob
+  await assertSucceeds(
+    msgDoc.set({
+      senderId: "alice",
+      receiverId: "bob",
+      senderName: "Alice Verma",
+      text: "Hey Bob! Want to collaborate on a tech video?",
+      createdAt: now
+    })
+  );
+
+  // Bob (receiver) can read the message
+  await assertSucceeds(bobDb.collection("messages").doc("msg_1").get());
+
+  // Alice (sender) can read the message
+  await assertSucceeds(aliceDb.collection("messages").doc("msg_1").get());
+
+  // Charlie (unrelated third party) CANNOT read Alice & Bob's private message
+  await assertFails(charlieDb.collection("messages").doc("msg_1").get());
+});

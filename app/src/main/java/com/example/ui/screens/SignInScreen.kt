@@ -89,31 +89,44 @@ fun SignInScreen(
                 }
             }
 
-            // Glowing App Icon
+            // Official Glowing Brand Logo
             Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(PurplePrimary, ElectricCyan)
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+                    .size(96.dp)
+                    .testTag("official_app_logo")
             ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "App Logo",
-                    tint = Color.White,
-                    modifier = Modifier.size(44.dp)
+                Box(
+                    modifier = Modifier
+                        .size(92.dp)
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    PurplePrimary.copy(alpha = 0.35f),
+                                    ElectricCyan.copy(alpha = 0.35f)
+                                )
+                            )
+                        )
+                )
+
+                Image(
+                    painter = painterResource(R.drawable.ic_creator_collab_logo),
+                    contentDescription = "Creator Collab Hub Official Logo",
+                    modifier = Modifier
+                        .size(86.dp)
+                        .clip(RoundedCornerShape(22.dp))
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             Text(
                 text = if (currentLanguage == AppLanguage.HINDI) "क्रिएटर कोलैब हब" else "Creator Collab Hub",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.5.sp
+                ),
                 color = TextPrimary,
                 textAlign = TextAlign.Center
             )
@@ -122,13 +135,15 @@ fun SignInScreen(
 
             Text(
                 text = if (currentLanguage == AppLanguage.HINDI)
-                    "भारतीय यूट्यूब क्रिएटर्स के लिए सहयोग व नेटवर्किंग प्लेटफॉर्म"
+                    "Find Creators. Build Together.\nभारतीय यूट्यूब क्रिएटर्स का सहयोग मंच"
                 else
-                    "India's Dedicated YouTube Collaboration & Cross-Promotion Network",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary,
-                textAlign = TextAlign.Center,
-                lineHeight = 20.sp
+                    "Find Creators. Build Together.\nIndia's YouTube Collaboration Network",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 20.sp
+                ),
+                color = ElectricCyan,
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(28.dp))

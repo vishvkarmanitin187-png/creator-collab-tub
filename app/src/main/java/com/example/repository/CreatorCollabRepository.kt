@@ -28,6 +28,9 @@ interface CreatorCollabRepository {
     fun getUserProfile(): Flow<CreatorProfile>
     suspend fun updateUserProfile(profile: CreatorProfile)
     suspend fun resetToDemoData()
+    fun getConversations(): Flow<List<ChatConversation>>
+    fun getMessages(chatPartnerId: String): Flow<List<ChatMessage>>
+    suspend fun sendMessage(targetCreatorId: String, targetCreatorName: String, text: String)
 }
 
 class LocalCreatorCollabRepository : CreatorCollabRepository {
@@ -35,6 +38,8 @@ class LocalCreatorCollabRepository : CreatorCollabRepository {
     private val _creators = MutableStateFlow<List<CreatorProfile>>(SampleData.sampleCreators)
     private val _collabRequests = MutableStateFlow<List<CollabRequest>>(SampleData.initialCollabRequests)
     private val _projects = MutableStateFlow<List<CollabProject>>(SampleData.initialProjects)
+    private val _conversations = MutableStateFlow<List<ChatConversation>>(SampleData.sampleConversations)
+    private val _messages = MutableStateFlow<List<ChatMessage>>(SampleData.sampleMessages)
 
     private val _userProfile = MutableStateFlow(
         CreatorProfile(
@@ -155,5 +160,55 @@ class LocalCreatorCollabRepository : CreatorCollabRepository {
         _creators.value = SampleData.sampleCreators
         _collabRequests.value = SampleData.initialCollabRequests
         _projects.value = SampleData.initialProjects
+        _conversations.value = SampleData.sampleConversations
+        _messages.value = SampleData.sampleMessages
+    }
+
+    override fun getConversations(): Flow<List<ChatConversation>> = _conversations.asStateFlow()
+
+    override fun getMessages(chatPartnerId: String): Flow<List<ChatMessage>> =
+        _messages.map { list ->
+            list.filter {
+                (it.senderId == chatPartnerId && it.receiverId == "user_me") ||
+                (it.senderId == "user_me" && it.receiverId == chatPartnerId)
+            }.sortedBy { it.timestampMillis }
+        }
+
+    override suspend fun sendMessage(targetCreatorId: String, targetCreatorName: String, text: String) {
+        val newMsg = ChatMessage(
+            id = "msg_${UUID.randomUUID().toString().take(8)}",
+            conversationId = "conv_$targetCreatorId",
+            senderId = "user_me",
+            receiverId = targetCreatorId,
+            senderName = _userProfile.value.name,
+            receiverName = targetCreatorName,
+            text = text,
+            timestampMillis = System.currentTimeMillis(),
+            isFromMe = true
+        )
+        val currentMsgs = _messages.value.toMutableList()
+        currentMsgs.add(newMsg)
+        _messages.value = currentMsgs
+
+        val currentConvs = _conversations.value.toMutableList()
+        val convIndex = currentConvs.indexOfFirst { it.partnerId == targetCreatorId }
+        val partnerCreator = _creators.value.find { it.id == targetCreatorId }
+        val updatedConv = ChatConversation(
+            partnerId = targetCreatorId,
+            partnerName = targetCreatorName,
+            partnerChannelName = partnerCreator?.channelName ?: targetCreatorName,
+            partnerCategory = partnerCreator?.category ?: CreatorCategory.TECH,
+            partnerAvatarColorHex = partnerCreator?.avatarColorHex ?: 0xFF8B5CF6,
+            lastMessage = text,
+            lastMessageTime = "Just now",
+            unreadCount = 0
+        )
+        if (convIndex != -1) {
+            currentConvs[convIndex] = updatedConv
+        } else {
+            currentConvs.add(0, updatedConv)
+        }
+        _conversations.value = currentConvs
     }
 }
+

@@ -49,6 +49,7 @@ enum class NavigationTab(
 ) {
     HOME("Home", "होम", Icons.Default.Home, "nav_tab_home"),
     EXPLORE("Explore", "खोजें", Icons.Default.Explore, "nav_tab_explore"),
+    MESSAGES("Messages", "संदेश", Icons.Default.Chat, "nav_tab_messages"),
     PROJECTS("Projects", "प्रोजेक्ट्स", Icons.Default.Assignment, "nav_tab_projects"),
     PROFILE("Profile", "प्रोफ़ाइल", Icons.Default.Person, "nav_tab_profile")
 }
@@ -59,14 +60,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val credentialManager = CredentialManager.create(this)
-        AuthManager.attemptAutoSignIn(
-            context = this,
-            credentialManager = credentialManager,
-            onAuthSuccess = {},
-            onUnauthenticated = {},
-            scope = lifecycleScope
-        )
+        try {
+            com.google.firebase.FirebaseApp.initializeApp(this)
+        } catch (_: Exception) {}
 
         setContent {
             MyApplicationTheme {
@@ -76,6 +72,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun AppContent() {
     val context = LocalContext.current
@@ -84,6 +81,7 @@ fun AppContent() {
     var currentUser by remember { mutableStateOf(Firebase.auth.currentUser) }
     var isGuestMode by remember { mutableStateOf(false) }
     var currentLanguage by remember { mutableStateOf(AppLanguage.ENGLISH) }
+    var showSplash by remember { mutableStateOf(true) }
 
     DisposableEffect(Unit) {
         val listener = FirebaseAuth.AuthStateListener { auth ->
@@ -98,7 +96,12 @@ fun AppContent() {
         }
     }
 
-    if (currentUser == null && !isGuestMode) {
+    if (showSplash) {
+        SplashScreen(
+            currentLanguage = currentLanguage,
+            onSplashFinished = { showSplash = false }
+        )
+    } else if (currentUser == null && !isGuestMode) {
         SignInScreen(
             currentLanguage = currentLanguage,
             onToggleLanguage = {
@@ -177,6 +180,8 @@ fun CreatorCollabApp(
     val collabTargetCreator by viewModel.collabTargetCreator.collectAsStateWithLifecycle()
     val collabRequests by viewModel.collabRequests.collectAsStateWithLifecycle()
     val projects by viewModel.projects.collectAsStateWithLifecycle()
+    val conversations by viewModel.conversations.collectAsStateWithLifecycle()
+    val selectedChatPartner by viewModel.selectedChatPartner.collectAsStateWithLifecycle()
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
     val profileSaveState by viewModel.profileSaveState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
@@ -203,7 +208,7 @@ fun CreatorCollabApp(
         containerColor = NavyBackground,
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
-            if (selectedCreator == null) {
+            if (selectedCreator == null && (currentTab != NavigationTab.MESSAGES || selectedChatPartner == null)) {
                 Column {
                     val screenTitle = when (currentTab) {
                         NavigationTab.HOME -> if (currentLanguage == AppLanguage.HINDI) {
@@ -215,6 +220,11 @@ fun CreatorCollabApp(
                             "क्रिएटर खोजें"
                         } else {
                             "Explore Creators"
+                        }
+                        NavigationTab.MESSAGES -> if (currentLanguage == AppLanguage.HINDI) {
+                            "संदेश व चैट"
+                        } else {
+                            "Creator Messages"
                         }
                         NavigationTab.PROJECTS -> if (currentLanguage == AppLanguage.HINDI) {
                             "सहयोग व प्रोजेक्ट्स"
@@ -235,6 +245,7 @@ fun CreatorCollabApp(
                             "YouTube Collab Platform"
                         }
                         NavigationTab.EXPLORE -> "${filteredCreators.size} ${if (currentLanguage == AppLanguage.HINDI) "क्रिएटर्स उपलब्ध" else "creators active"}"
+                        NavigationTab.MESSAGES -> "${conversations.size} ${if (currentLanguage == AppLanguage.HINDI) "बातचीत सक्रिय" else "active conversations"}"
                         NavigationTab.PROJECTS -> "${projects.size} ${if (currentLanguage == AppLanguage.HINDI) "प्रोजेक्ट्स" else "pipelines"}"
                         NavigationTab.PROFILE -> userProfile.channelName
                     }
@@ -245,6 +256,7 @@ fun CreatorCollabApp(
                         currentLanguage = currentLanguage,
                         onToggleLanguage = { viewModel.toggleLanguage() }
                     )
+
 
                     if (isGuest) {
                         Surface(
@@ -333,13 +345,16 @@ fun CreatorCollabApp(
                             selected = isSelected,
                             onClick = { currentTab = tab },
                             icon = {
-                                if (tab == NavigationTab.PROJECTS && collabRequests.any {
+                                val hasProjectsBadge = tab == NavigationTab.PROJECTS && collabRequests.any {
                                     it.isIncoming && it.status == com.example.model.CollabStatus.PENDING
-                                }) {
+                                }
+                                val hasMessagesBadge = tab == NavigationTab.MESSAGES && conversations.any { it.unreadCount > 0 }
+
+                                if (hasProjectsBadge || hasMessagesBadge) {
                                     BadgedBox(
                                         badge = {
-                                            Badge(containerColor = AmberAccent) {
-                                                Text("1", color = Color.Black)
+                                            Badge(containerColor = if (hasMessagesBadge) PurplePrimary else AmberAccent) {
+                                                Text("1", color = Color.White)
                                             }
                                         }
                                     ) {
@@ -405,7 +420,12 @@ fun CreatorCollabApp(
                         creator = selectedCreator!!,
                         currentLanguage = currentLanguage,
                         onBack = { viewModel.selectCreator(null) },
-                        onCollabClick = { creator -> viewModel.openCollabDialog(creator) }
+                        onCollabClick = { creator -> viewModel.openCollabDialog(creator) },
+                        onStartChat = { creator ->
+                            viewModel.selectChatPartner(creator)
+                            viewModel.selectCreator(null)
+                            currentTab = NavigationTab.MESSAGES
+                        }
                     )
                 } else {
                     when (currentTab) {
@@ -442,7 +462,21 @@ fun CreatorCollabApp(
                             )
                         }
 
+                        NavigationTab.MESSAGES -> {
+                            MessagesScreen(
+                                conversations = conversations,
+                                allCreators = rawCreators,
+                                selectedPartner = selectedChatPartner,
+                                currentLanguage = currentLanguage,
+                                onSelectPartner = { partner -> viewModel.selectChatPartner(partner) },
+                                getMessagesForPartner = { partnerId -> viewModel.getMessagesForPartner(partnerId) },
+                                onSendMessage = { pId, pName, text -> viewModel.sendChatMessage(pId, pName, text) },
+                                onNavigateToExplore = { currentTab = NavigationTab.EXPLORE }
+                            )
+                        }
+
                         NavigationTab.PROJECTS -> {
+
                             ProjectsScreen(
                                 projects = projects,
                                 collabRequests = collabRequests,

@@ -46,8 +46,14 @@ class CreatorCollabViewModel(
     private val _collabTargetCreator = MutableStateFlow<CreatorProfile?>(null)
     val collabTargetCreator: StateFlow<CreatorProfile?> = _collabTargetCreator.asStateFlow()
 
+    private val _selectedChatPartner = MutableStateFlow<CreatorProfile?>(null)
+    val selectedChatPartner: StateFlow<CreatorProfile?> = _selectedChatPartner.asStateFlow()
+
     private val _snackbarMessage = MutableStateFlow<String?>(null)
     val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
+
+    val conversations: StateFlow<List<ChatConversation>> = repository.getConversations()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val rawCreators = repository.getCreators()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -294,7 +300,31 @@ class CreatorCollabViewModel(
         }
     }
 
+    fun selectChatPartner(partner: CreatorProfile?) {
+        _selectedChatPartner.value = partner
+    }
+
+    fun getMessagesForPartner(partnerId: String): Flow<List<ChatMessage>> {
+        return repository.getMessages(partnerId)
+    }
+
+    fun sendChatMessage(targetCreatorId: String, targetCreatorName: String, text: String) {
+        if (text.isBlank()) return
+        viewModelScope.launch {
+            try {
+                repository.sendMessage(targetCreatorId, targetCreatorName, text.trim())
+            } catch (e: Exception) {
+                _snackbarMessage.value = if (_appLanguage.value == AppLanguage.HINDI) {
+                    "संदेश भेजने में त्रुटि हुई"
+                } else {
+                    "Failed to send message"
+                }
+            }
+        }
+    }
+
     fun clearSnackbar() {
         _snackbarMessage.value = null
     }
 }
+

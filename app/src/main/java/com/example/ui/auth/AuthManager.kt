@@ -57,31 +57,32 @@ object AuthManager {
         onUnauthenticated: () -> Unit,
         scope: CoroutineScope
     ) {
-        if (Firebase.auth.currentUser != null) {
-            onAuthSuccess()
-            return
-        }
-        val activity = context.findActivity()
-        if (activity == null) {
-            onUnauthenticated()
-            return
-        }
-        val clientId = resolveWebClientId(context) ?: run {
-            onUnauthenticated()
-            return
-        }
+        try {
+            val isAlreadyAuth = try { Firebase.auth.currentUser != null } catch (_: Exception) { false }
+            if (isAlreadyAuth) {
+                onAuthSuccess()
+                return
+            }
+            val activity = context.findActivity() ?: run {
+                onUnauthenticated()
+                return
+            }
+            val clientId = resolveWebClientId(context) ?: run {
+                onUnauthenticated()
+                return
+            }
 
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(true)
-            .setServerClientId(clientId)
-            .setAutoSelectEnabled(true)
-            .build()
+            val googleIdOption = GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(true)
+                .setServerClientId(clientId)
+                .setAutoSelectEnabled(true)
+                .build()
 
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
+            val request = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
 
-        scope.launch {
+            scope.launch {
             try {
                 val result = credentialManager.getCredential(activity, request)
                 val credential = result.credential
@@ -97,7 +98,10 @@ object AuthManager {
                 onUnauthenticated()
             }
         }
+    } catch (e: Exception) {
+        onUnauthenticated()
     }
+}
 
     fun onGoogleSignInClicked(
         context: Context,

@@ -62,3 +62,15 @@ data class FirestoreProject(
     @ServerTimestamp val createdAt: Timestamp? = null,
     @ServerTimestamp val updatedAt: Timestamp? = null
 )
+
+@IgnoreExtraProperties
+data class FirestoreChatMessage(
+    @DocumentId val id: String = "",
+    val senderId: String = "",
+    val receiverId: String = "",
+    val senderName: String = "",
+    val receiverName: String = "",
+    val text: String = "",
+    @ServerTimestamp val createdAt: Timestamp? = null
+)
+

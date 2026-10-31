@@ -225,4 +225,74 @@ object SampleData {
             lastUpdated = "3 days ago"
         )
     )
+
+    val sampleConversations = listOf(
+        ChatConversation(
+            partnerId = "creator_2",
+            partnerName = "Aditya Nair",
+            partnerChannelName = "SiliconDosa Tech",
+            partnerCategory = CreatorCategory.TECH,
+            partnerAvatarColorHex = 0xFF06B6D4,
+            lastMessage = "Hey Ravi! I checked your studio setup video, looks amazing. Let's do the blind camera comparison!",
+            lastMessageTime = "10:15 AM",
+            unreadCount = 1
+        ),
+        ChatConversation(
+            partnerId = "creator_1",
+            partnerName = "Vikram Verma",
+            partnerChannelName = "CineVibes Hindi",
+            partnerCategory = CreatorCategory.MOVIE_FACTS,
+            partnerAvatarColorHex = 0xFFE11D48,
+            lastMessage = "Sent you the Drive link with the raw footage. Let me know if you need any extra b-roll.",
+            lastMessageTime = "Yesterday",
+            unreadCount = 0
+        ),
+        ChatConversation(
+            partnerId = "creator_5",
+            partnerName = "Neha Rathore",
+            partnerChannelName = "DhunAcoustic",
+            partnerCategory = CreatorCategory.MUSIC,
+            partnerAvatarColorHex = 0xFF10B981,
+            lastMessage = "Recorded the acoustic guitar stems! Sending over shortly.",
+            lastMessageTime = "2 days ago",
+            unreadCount = 0
+        )
+    )
+
+    val sampleMessages = listOf(
+        ChatMessage(
+            id = "msg_1",
+            conversationId = "conv_creator_2",
+            senderId = "creator_2",
+            receiverId = "user_me",
+            senderName = "Aditya Nair",
+            receiverName = "Ravi Verma",
+            text = "Hey Ravi, loved your latest YouTube upload on Creator Studio setup!",
+            timestampMillis = System.currentTimeMillis() - 7200000,
+            isFromMe = false
+        ),
+        ChatMessage(
+            id = "msg_2",
+            conversationId = "conv_creator_2",
+            senderId = "user_me",
+            receiverId = "creator_2",
+            senderName = "Ravi Verma",
+            receiverName = "Aditya Nair",
+            text = "Thanks Aditya! Huge fan of your smartphone blind test format as well.",
+            timestampMillis = System.currentTimeMillis() - 3600000,
+            isFromMe = true
+        ),
+        ChatMessage(
+            id = "msg_3",
+            conversationId = "conv_creator_2",
+            senderId = "creator_2",
+            receiverId = "user_me",
+            senderName = "Aditya Nair",
+            receiverName = "Ravi Verma",
+            text = "Hey Ravi! I checked your studio setup video, looks amazing. Let's do the blind camera comparison!",
+            timestampMillis = System.currentTimeMillis() - 1200000,
+            isFromMe = false
+        )
+    )
 }
+

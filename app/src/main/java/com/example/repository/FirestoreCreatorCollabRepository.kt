@@ -17,9 +17,20 @@ import kotlinx.coroutines.tasks.await
 class FirestoreCreatorCollabRepository(private val db: FirebaseFirestore) : CreatorCollabRepository {
 
     constructor(context: Context) : this(
-        FirebaseFirestore.getInstance(
-            context.applicationContext.getString(R.string.firestore_database_id)
-        )
+        try {
+            val app = com.google.firebase.FirebaseApp.getInstance()
+            val dbId = try {
+                context.applicationContext.getString(R.string.firestore_database_id)
+            } catch (e: Exception) { "" }
+
+            if (dbId.isNotBlank()) {
+                FirebaseFirestore.getInstance(app, dbId)
+            } else {
+                FirebaseFirestore.getInstance(app)
+            }
+        } catch (e: Exception) {
+            FirebaseFirestore.getInstance()
+        }
     )
 
     private val auth = com.google.firebase.auth.FirebaseAuth.getInstance(db.app)
@@ -77,7 +88,11 @@ class FirestoreCreatorCollabRepository(private val db: FirebaseFirestore) : Crea
         getCreators().map { list -> list.find { it.id == id } }
 
     override fun getCollabRequests(): Flow<List<CollabRequest>> = flow {
-        val uid = requireUserId()
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            emit(SampleData.initialCollabRequests)
+            return@flow
+        }
         val sentFlow = db.collection("collab_requests")
             .whereEqualTo("senderUserId", uid)
             .snapshots()
@@ -200,7 +215,11 @@ class FirestoreCreatorCollabRepository(private val db: FirebaseFirestore) : Crea
     }
 
     override fun getProjects(): Flow<List<CollabProject>> = flow {
-        val uid = requireUserId()
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            emit(SampleData.initialProjects)
+            return@flow
+        }
         emitAll(
             db.collection("projects")
                 .whereEqualTo("creatorUserId", uid)
@@ -313,8 +332,31 @@ class FirestoreCreatorCollabRepository(private val db: FirebaseFirestore) : Crea
     }
 
     override fun getUserProfile(): Flow<CreatorProfile> = flow {
-        val uid = requireUserId()
+        val uid = auth.currentUser?.uid
         val defaultName = auth.currentUser?.displayName ?: "Creator"
+        if (uid.isNullOrBlank()) {
+            emit(
+                CreatorProfile(
+                    id = "guest_user",
+                    name = defaultName,
+                    channelName = "$defaultName Studio",
+                    channelHandle = "@" + defaultName.replace(" ", "").lowercase(),
+                    channelUrl = "https://www.youtube.com",
+                    category = CreatorCategory.TECH,
+                    subscriberRange = SubscriberRange.TIER_100K_500K,
+                    language = "Hindi / Hinglish",
+                    collaborationInterests = listOf("Cross-Promotion", "Guest Podcasts", "Tech Review Exchanges"),
+                    bio = "YouTube creator building impactful content and exploring collaborations.",
+                    city = "New Delhi, India",
+                    country = "India",
+                    photoUri = null,
+                    isSample = false,
+                    sampleNotice = "COMMUNITY CREATOR",
+                    avatarColorHex = 0xFF8B5CF6
+                )
+            )
+            return@flow
+        }
         val docRef = db.collection("users").document(uid)
 
         emitAll(
@@ -428,4 +470,117 @@ class FirestoreCreatorCollabRepository(private val db: FirebaseFirestore) : Crea
     override suspend fun resetToDemoData() {
         // Keeps cloud data clean while reloading sample set
     }
+
+    override fun getConversations(): Flow<List<ChatConversation>> = flow {
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            emit(SampleData.sampleConversations)
+            return@flow
+        }
+        val sentFlow = db.collection("messages")
+            .whereEqualTo("senderId", uid)
+            .snapshots()
+            .map { snap -> snap.toObjects(FirestoreChatMessage::class.java) }
+            .catch { error ->
+                if (error is Exception) handleFirestoreError(error, OperationType.LIST, "messages")
+                emit(emptyList())
+            }
+
+        val receivedFlow = db.collection("messages")
+            .whereEqualTo("receiverId", uid)
+            .snapshots()
+            .map { snap -> snap.toObjects(FirestoreChatMessage::class.java) }
+            .catch { error ->
+                if (error is Exception) handleFirestoreError(error, OperationType.LIST, "messages")
+                emit(emptyList())
+            }
+
+        emitAll(
+            combine(sentFlow, receivedFlow) { sent, received ->
+                val allMsgs = (sent + received).sortedByDescending { it.createdAt?.toDate()?.time ?: 0L }
+                val groupedByPartner = allMsgs.groupBy { msg ->
+                    if (msg.senderId == uid) msg.receiverId else msg.senderId
+                }
+                val convList = groupedByPartner.map { (partnerId, msgs) ->
+                    val latest = msgs.first()
+                    val partnerName = if (latest.senderId == uid) latest.receiverName else latest.senderName
+                    val timeStr = latest.createdAt?.toDate()?.let {
+                        java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(it)
+                    } ?: "Recently"
+                    ChatConversation(
+                        partnerId = partnerId,
+                        partnerName = partnerName.ifBlank { "Creator" },
+                        partnerChannelName = partnerName.ifBlank { "Channel" },
+                        partnerCategory = CreatorCategory.TECH,
+                        partnerAvatarColorHex = 0xFF8B5CF6,
+                        lastMessage = latest.text,
+                        lastMessageTime = timeStr,
+                        unreadCount = 0
+                    )
+                }
+                if (convList.isNotEmpty()) convList else SampleData.sampleConversations
+            }
+        )
+    }
+
+    override fun getMessages(chatPartnerId: String): Flow<List<ChatMessage>> = flow {
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            emit(SampleData.sampleMessages.filter { it.senderId == chatPartnerId || it.receiverId == chatPartnerId })
+            return@flow
+        }
+        val sentFlow = db.collection("messages")
+            .whereEqualTo("senderId", uid)
+            .whereEqualTo("receiverId", chatPartnerId)
+            .snapshots()
+            .map { snap -> snap.toObjects(FirestoreChatMessage::class.java) }
+            .catch { emit(emptyList()) }
+
+        val receivedFlow = db.collection("messages")
+            .whereEqualTo("senderId", chatPartnerId)
+            .whereEqualTo("receiverId", uid)
+            .snapshots()
+            .map { snap -> snap.toObjects(FirestoreChatMessage::class.java) }
+            .catch { emit(emptyList()) }
+
+        emitAll(
+            combine(sentFlow, receivedFlow) { sent, received ->
+                val combined = (sent + received).map { doc ->
+                    ChatMessage(
+                        id = doc.id,
+                        conversationId = "conv_$chatPartnerId",
+                        senderId = doc.senderId,
+                        receiverId = doc.receiverId,
+                        senderName = doc.senderName,
+                        receiverName = doc.receiverName,
+                        text = doc.text,
+                        timestampMillis = doc.createdAt?.toDate()?.time ?: System.currentTimeMillis(),
+                        isFromMe = (doc.senderId == uid)
+                    )
+                }.sortedBy { it.timestampMillis }
+                if (combined.isNotEmpty()) combined else SampleData.sampleMessages.filter { it.senderId == chatPartnerId || it.receiverId == chatPartnerId }
+            }
+        )
+    }
+
+    override suspend fun sendMessage(targetCreatorId: String, targetCreatorName: String, text: String) {
+        val uid = requireUserId()
+        val docRef = db.collection("messages").document()
+        val currentUserName = auth.currentUser?.displayName ?: "Creator"
+        val payload = mapOf(
+            "senderId" to uid,
+            "receiverId" to targetCreatorId,
+            "senderName" to currentUserName,
+            "receiverName" to targetCreatorName,
+            "text" to text,
+            "createdAt" to FieldValue.serverTimestamp()
+        )
+        try {
+            docRef.set(payload).await()
+        } catch (e: Exception) {
+            handleFirestoreError(e, OperationType.CREATE, docRef.path)
+            throw e
+        }
+    }
 }
+

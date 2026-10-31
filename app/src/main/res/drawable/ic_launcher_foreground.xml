@@ -3,6 +3,6 @@
     <item
         android:width="66dp"
         android:height="66dp"
-        android:drawable="@drawable/collab_hub_icon_1792469891799"
+        android:drawable="@drawable/ic_creator_collab_logo"
         android:gravity="center" />
 </layer-list>
