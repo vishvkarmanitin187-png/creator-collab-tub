@@ -7,56 +7,54 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Show SHA-1
-        run: keytool -list -v -keystore debug.keystore -storepass android -alias androiddebugkey | grep SHA1
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: 17
 
-      - name: Install Android SDK packages (API 36)
+      - name: Create debug keystore once and save it in repo
         run: |
-          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          yes | "$SDKM" --licenses > /dev/null || true
-          "$SDKM" "platforms;android-36" "build-tools;36.0.0"
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add -f debug.keystore
+            git commit -m "ci: add stable debug keystore"
+            git push || echo "push failed, keystore not saved"
+          fi
+
+      - name: Show SHA-1 and SHA-256
+        run: |
+          keytool -list -v -keystore debug.keystore -storepass android -alias androiddebugkey 2>&1 | grep -E "SHA1|SHA256|Error|error" || true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.3.1'
 
-      - name: Restore debug keystore & configuration
+      - name: Build debug APK
         run: |
-          touch .env
-          if [ -f debug.keystore.base64 ]; then
-            base64 -d debug.keystore.base64 > debug.keystore || true
-          fi
-          if [ ! -f debug.keystore ] || [ ! -s debug.keystore ]; then
-            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          fi
-
-      - name: Build APK
-        run: |
-          if [ -f ./gradlew ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug --stacktrace --no-daemon
-          else
-            gradle assembleDebug --stacktrace --no-daemon
-          fi
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: creator-collab-hub-debug-apk
-          path: "**/build/outputs/apk/debug/*.apk"
-          if-no-files-found: error
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
