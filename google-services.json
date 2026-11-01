@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "540877640595",
+    "project_id": "creator-collab-tub-hub",
+    "storage_bucket": "creator-collab-tub-hub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540877640595:android:24a9dd50ae47c56d1d8e66",
+        "android_client_info": {
+          "package_name": "com.aistudio.creatorcollab.tub.hub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN3F8n5SNWN1_FoUeWLS_VSIepPYp2USI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
