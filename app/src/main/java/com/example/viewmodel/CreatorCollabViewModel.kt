@@ -69,6 +69,7 @@ class CreatorCollabViewModel(
             val matchesQuery = query.isBlank() ||
                     creator.name.contains(query, ignoreCase = true) ||
                     creator.channelName.contains(query, ignoreCase = true) ||
+                    creator.channelHandle.contains(query.removePrefix("@"), ignoreCase = true) ||
                     creator.bio.contains(query, ignoreCase = true) ||
                     creator.collaborationInterests.any { it.contains(query, ignoreCase = true) }
 
@@ -327,4 +328,3 @@ class CreatorCollabViewModel(
         _snackbarMessage.value = null
     }
 }
-
