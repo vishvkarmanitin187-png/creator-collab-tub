@@ -316,6 +316,7 @@ fun HomeScreen(
                             onNavigateToExplore()
                         }
                 ) {
+                    Column(
                         modifier = Modifier.padding(14.dp)
                     ) {
                         Icon(
@@ -349,6 +350,31 @@ fun HomeScreen(
                 Surface(
                     shape = RoundedCornerShape(14.dp),
                     color = NavySurface,
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        NavyBorder
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            onNavigateToProjects()
+                        }
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Assignment,
+                            contentDescription = null,
+                            tint = ElectricCyan,
+                            modifier = Modifier.size(26.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = if (currentLanguage == AppLanguage.HINDI)
+                                "प्रोजेक्ट्स"
                             else
                                 "Collaboration",
                             style = MaterialTheme.typography.titleMedium.copy(
@@ -381,6 +407,39 @@ fun HomeScreen(
                 Text(
                     text = if (currentLanguage == AppLanguage.HINDI)
                         "प्रमुख क्रिएटर्स"
+                    else
+                        "Featured Creators",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = TextPrimary
+                )
+
+                Text(
+                    text = "${creators.take(4).size} ${
+                        if (currentLanguage == AppLanguage.HINDI)
+                            "प्रोफ़ाइल"
+                        else
+                            "profiles"
+                    }",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextMuted
+                )
+            }
+        }
+
+        if (creators.isEmpty()) {
+            item {
+                Text(
+                    text = if (currentLanguage == AppLanguage.HINDI)
+                        "अभी कोई क्रिएटर नहीं जुड़ा। अपनी प्रोफ़ाइल सेव करें और दोस्तों को बुलाएँ!"
+                    else
+                        "No creators yet. Save your profile and invite friends!",
+                    color = TextSecondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
 
         items(creators.take(4)) { creator ->
