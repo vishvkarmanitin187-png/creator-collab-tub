@@ -22,3 +22,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.model.AppLanguage
+import com.example.repository.FirestoreCreatorCollabRepository
+import com.example.ui.auth.AuthManager
+                                        channelName = chName,
+                                        channelUrl = chUrl,
+                                        category = cat,
+                                        subRange = sub,
+                                        language = lang,
+                                        country = country,
+                                        bio = bio,
+                                        interests = interests,
+                                        photoUri = photoUri
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (collabTargetCreator != null) {
+                    CollabRequestDialog(
+                        targetCreator = collabTargetCreator!!,
+                        currentLanguage = currentLanguage,
+                        onDismiss = { viewModel.closeCollabDialog() },
+                        onSubmit = { title, type, timeline, message ->
+                            viewModel.sendCollabProposal(title, type, timeline, message)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
