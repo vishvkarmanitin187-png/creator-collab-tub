@@ -50,6 +50,13 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
+      - name: Write YouTube API key into app
+        env:
+          YT_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          mkdir -p app/src/main/java/com/example/youtube
+          printf 'package com.example.youtube\n\nobject YouTubeKey {\n    const val VALUE = "%s"\n}\n' "$YT_KEY" > app/src/main/java/com/example/youtube/YouTubeKey.kt
+
       - name: Build debug APK
         run: gradle assembleDebug --stacktrace
 
