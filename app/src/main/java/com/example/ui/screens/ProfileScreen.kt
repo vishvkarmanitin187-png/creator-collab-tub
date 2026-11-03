@@ -35,6 +35,7 @@ import com.example.R
 import com.example.model.*
 import com.example.ui.theme.*
 import com.example.viewmodel.ProfileSaveState
+import com.example.ui.components.YouTubeLookupButton
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -279,6 +280,20 @@ fun ProfileScreen(
                             unfocusedTextColor = TextPrimary
                         ),
                         singleLine = true
+                    )
+
+                    YouTubeLookupButton(
+                        handle = channelHandleState,
+                        currentLanguage = currentLanguage,
+                        onFound = { ch, range ->
+                            channelNameState = ch.title
+                            channelUrlState = ch.url
+                            subRangeState = range
+                            if (ch.thumbnailUrl.isNotBlank()) photoUriState = ch.thumbnailUrl
+                            if (bioState.isBlank() || bioState.startsWith("YouTube creator building")) {
+                                bioState = ch.description.take(300)
+                            }
+                        }
                     )
 
                     OutlinedTextField(
