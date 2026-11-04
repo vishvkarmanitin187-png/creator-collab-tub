@@ -14,14 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "610646863688-0e06nlao62cph45ha9o6iqo2jcj7nc1c.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.aistudio.creatorcollab.hub",
-            "certificate_hash": "04b06d1c2765f3789cf7f9533dceffedb1994891"
-          }
-        },
-        {
           "client_id": "610646863688-fhs9t734ia2rnrcj7j0do08cc8mgboct.apps.googleusercontent.com",
           "client_type": 3
         }
