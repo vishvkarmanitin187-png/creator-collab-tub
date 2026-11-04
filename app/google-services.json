@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:610646863688:android:ee358337eecd3f715ecd7d",
+        "mobilesdk_app_id": "1:610646863688:android:82e45d075b1a67575ecd7d",
         "android_client_info": {
-          "package_name": "com.aistudio.creatorcollab.hub"
+          "package_name": "com.aistudio.creatorcollab.tub"
         }
       },
       "oauth_client": [
