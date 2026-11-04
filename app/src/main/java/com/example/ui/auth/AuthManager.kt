@@ -143,9 +143,19 @@ object AuthManager {
                 }
             } catch (e: GetCredentialCancellationException) {
                 Log.w(TAG, "Google Sign-In flow cancelled or dismissed: ${e.message}", e)
+                android.widget.Toast.makeText(
+                    context,
+                    "Login cancelled: ${e.type} | ${e.message}",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
                 onAuthCancelled()
             } catch (e: Exception) {
                 Log.e(TAG, "Google Sign-In failed", e)
+                android.widget.Toast.makeText(
+                    context,
+                    "Login error: ${e.javaClass.simpleName} | ${e.message}",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
                 onAuthError(e.localizedMessage ?: "Google Sign-In failed. Please try again.")
             }
         }
