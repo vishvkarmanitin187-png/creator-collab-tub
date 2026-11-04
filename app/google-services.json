@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "610646863688",
-    "project_id": "creator-collab-tub-hub-fd245",
-    "storage_bucket": "creator-collab-tub-hub-fd245.firebasestorage.app"
+    "project_number": "490278246858",
+    "project_id": "creator-collab-tub-hub-5280e",
+    "storage_bucket": "creator-collab-tub-hub-5280e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:610646863688:android:82e45d075b1a67575ecd7d",
+        "mobilesdk_app_id": "1:490278246858:android:1de143dd072a15678b9733",
         "android_client_info": {
-          "package_name": "com.aistudio.creatorcollab.tub"
+          "package_name": "com.aistudio.creatorcollab.hub"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "610646863688-fhs9t734ia2rnrcj7j0do08cc8mgboct.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBkjlbx3dyFWLGJwDtL5BQtDz1xuUm__V0"
+          "current_key": "AIzaSyCXZp8W-U28hDqd815LAFwCpuabMtKr1E4"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "610646863688-fhs9t734ia2rnrcj7j0do08cc8mgboct.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
