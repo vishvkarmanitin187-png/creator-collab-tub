@@ -1,3 +1,4 @@
+
 name: Build Android APK
 
 on:
@@ -43,12 +44,18 @@ jobs:
 
       - name: Show SHA-1 and SHA-256
         run: |
-          keytool -list -v -keystore debug.keystore -storepass android -alias androiddebugkey 2>&1 | grep -E "SHA1|SHA256|Error|error" || true
+          keytool -list -v \
+            -keystore debug.keystore \
+            -storepass android \
+            -alias androiddebugkey 2>&1 | grep -E "SHA1|SHA256|Error|error" || true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "9.3.1"
+
+      - name: Get Android Signing Report
+        run: gradle :app:signingReport --stacktrace
 
       - name: Write YouTube API key into app
         env:
