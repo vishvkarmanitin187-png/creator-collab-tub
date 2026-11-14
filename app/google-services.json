@@ -1,41 +1,33 @@
 {
   "project_info": {
-    "project_number": "825098887513",
-    "project_id": "creator-collab-tub-hub-5-cd608",
-    "storage_bucket": "creator-collab-tub-hub-5-cd608.firebasestorage.app"
+    "project_number": "156894721846",
+    "project_id": "gen-lang-client-0527013320",
+    "storage_bucket": "gen-lang-client-0527013320.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:825098887513:android:6f885931e6692f00bb2c48",
+        "mobilesdk_app_id": "1:156894721846:android:c60c0bbc11b897a6f92597",
         "android_client_info": {
           "package_name": "com.aistudio.creatorcollab.hub"
         }
       },
       "oauth_client": [
         {
-          "client_id": "825098887513-pgm41m4uetvbhtpgrisrj25ma20urm0r.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.aistudio.creatorcollab.hub",
-            "certificate_hash": "04b06d1c2765f3789cf7f9533dceffedb1994891"
-          }
-        },
-        {
-          "client_id": "825098887513-m8bdg3dfouuv6bkj1867t8ksqmcl798b.apps.googleusercontent.com",
+          "client_id": "156894721846-55mu9b0lbt51s3qgrs7ob4kk72mdibbi.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBmsODTdhgkogIj9NWMCn5ZHVkZkTsvEy4"
+          "current_key": "AIzaSyDgDnSvZYKgSoOcGGgXXOBzri5vcF8sFmc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "825098887513-m8bdg3dfouuv6bkj1867t8ksqmcl798b.apps.googleusercontent.com",
+              "client_id": "156894721846-55mu9b0lbt51s3qgrs7ob4kk72mdibbi.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
